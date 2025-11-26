@@ -1,0 +1,5 @@
+{
+  "session_id": "47cfed13-839e-43ad-a04d-bae25f570f72",
+  "simulator_type": "scrum_master",
+  "prompt": "Ayer complete el endpoint de autenticacion JWT. Hoy voy a trabajar en roles y permisos. Tengo un impedimento: necesito acceso a la BD de testing que esta desactualizada. Mi estimacion era 5 story points y llevamos 7 dias por deuda tecnica no prevista."
+}

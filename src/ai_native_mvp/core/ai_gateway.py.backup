@@ -1,0 +1,553 @@
+"""
+AI Gateway - Componente central que coordina todos los submodelos
+Implementa la arquitectura C4 del ecosistema AI-Native
+
+REFACTORIZADO (2025-11-19):
+- Ahora es completamente STATELESS (no mantiene estado en memoria)
+- Dependency Injection completa (repositorios inyectados)
+- Escalable (puede funcionar con múltiples instancias)
+- Testeable (fácil mockear dependencias)
+"""
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+import uuid
+
+from .cognitive_engine import CognitiveReasoningEngine, AgentMode
+from ..models.trace import CognitiveTrace, TraceLevel, InteractionType, TraceSequence
+from ..models.risk import Risk, RiskType, RiskLevel, RiskDimension, RiskReport
+from ..models.evaluation import EvaluationReport
+from ..llm import LLMProviderFactory, LLMProvider
+
+
+class AIGateway:
+    """
+    AI Gateway - Orquestador central STATELESS del ecosistema AI-Native
+
+    Componentes:
+    - C1: Motor LLM (conexión a OpenAI/Anthropic/etc)
+    - C2: Ingesta y Comprensión de Prompt (IPC)
+    - C3: Motor de Razonamiento Cognitivo-Pedagógico (CRPE)
+    - C4: Gobernanza, Seguridad y Riesgo (GSR)
+    - C5: Orquestación de Submodelos (OSM)
+    - C6: Trazabilidad Cognitiva N4
+
+    Integra:
+    - T-IA-Cog: Tutor IA Cognitivo
+    - E-IA-Proc: Evaluador de Procesos
+    - S-IA-X: Simuladores Profesionales
+    - AR-IA: Analista de Riesgo
+    - GOV-IA: Gobernanza
+    - TC-N4: Trazabilidad
+
+    IMPORTANTE: Gateway es STATELESS
+    - Todo el estado se persiste en BD via repositorios
+    - No mantiene sesiones/trazas/riesgos en memoria
+    - Puede usarse con múltiples instancias (load balancer)
+    """
+
+    def __init__(
+        self,
+        llm_provider: Optional[LLMProvider] = None,
+        cognitive_engine: Optional[CognitiveReasoningEngine] = None,
+        session_repo: Optional[Any] = None,
+        trace_repo: Optional[Any] = None,
+        risk_repo: Optional[Any] = None,
+        evaluation_repo: Optional[Any] = None,
+        sequence_repo: Optional[Any] = None,
+        config: Optional[Dict[str, Any]] = None
+    ):
+        """
+        Inicializa el AI Gateway con Dependency Injection completa
+
+        Args:
+            llm_provider: Proveedor de LLM (inyectado)
+            cognitive_engine: Motor de razonamiento cognitivo (inyectado)
+            session_repo: Repositorio de sesiones (inyectado)
+            trace_repo: Repositorio de trazas (inyectado)
+            risk_repo: Repositorio de riesgos (inyectado)
+            evaluation_repo: Repositorio de evaluaciones (inyectado)
+            sequence_repo: Repositorio de secuencias (inyectado)
+            config: Configuración adicional
+
+        Note:
+            Si no se inyectan dependencias, se crean con valores por defecto
+            (útil para backward compatibility con código existente)
+        """
+        self.config = config or {}
+
+        # C1: Motor LLM - Usar proveedor inyectado o crear uno por defecto
+        if llm_provider is not None:
+            self.llm = llm_provider
+        else:
+            # Backward compatibility: crear proveedor mock por defecto
+            self.llm = LLMProviderFactory.create("mock", self.config.get("llm", {}))
+
+        # C3: Motor de Razonamiento Cognitivo-Pedagógico - Inyectado
+        if cognitive_engine is not None:
+            self.cognitive_engine = cognitive_engine
+        else:
+            # Backward compatibility
+            self.cognitive_engine = CognitiveReasoningEngine(self.config)
+
+        # Repositorios inyectados (opcional para backward compatibility)
+        self.session_repo = session_repo
+        self.trace_repo = trace_repo
+        self.risk_repo = risk_repo
+        self.evaluation_repo = evaluation_repo
+        self.sequence_repo = sequence_repo
+
+        # ✅ ELIMINADO: No más estado en memoria
+        # ❌ self.trace_sequences: Dict[str, TraceSequence] = {}
+        # ❌ self.traces: List[CognitiveTrace] = []
+        # ❌ self.risks: Dict[str, RiskReport] = {}
+        # ❌ self.active_sessions: Dict[str, Dict[str, Any]] = {}
+
+    def create_session(
+        self,
+        student_id: str,
+        activity_id: str,
+        mode: str = "TUTOR",
+        session_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Crea una nueva sesión de interacción (STATELESS)
+
+        Args:
+            student_id: ID del estudiante
+            activity_id: ID de la actividad
+            mode: Modo del agente (TUTOR, EVALUATOR, etc.)
+            session_id: ID de sesión (opcional, se genera si no se proporciona)
+            metadata: Metadata adicional
+
+        Returns:
+            session_id: ID de la sesión creada
+
+        Note:
+            Si session_repo está inyectado, persiste en BD.
+            Si no, solo retorna el ID (backward compatibility para CLI).
+        """
+        if session_id is None:
+            session_id = str(uuid.uuid4())
+
+        # ✅ STATELESS: Persistir en BD via repositorio (si está inyectado)
+        if self.session_repo is not None:
+            db_session = self.session_repo.create(
+                student_id=student_id,
+                activity_id=activity_id,
+                mode=mode
+            )
+            session_id = db_session.id
+
+        # ✅ STATELESS: Crear secuencia de trazas en BD (si está inyectado)
+        if self.sequence_repo is not None:
+            trace_sequence = TraceSequence(
+                id=f"seq_{session_id}",
+                session_id=session_id,
+                student_id=student_id,
+                activity_id=activity_id
+            )
+            self.sequence_repo.create(trace_sequence)
+
+        # ❌ ELIMINADO: No más guardado en memoria
+        # self.active_sessions[session_id] = session
+        # self.trace_sequences[session_id] = trace_sequence
+
+        return session_id
+
+    def process_interaction(
+        self,
+        session_id: str,
+        prompt: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Procesa una interacción del estudiante a través del gateway
+
+        Este es el flujo principal que:
+        1. Clasifica el prompt (IPC)
+        2. Verifica gobernanza (GSR)
+        3. Genera estrategia pedagógica (CRPE)
+        4. Detecta riesgos (AR-IA)
+        5. Registra en trazabilidad (N4)
+        6. Genera respuesta según el agente activo
+
+        Args:
+            session_id: ID de la sesión
+            prompt: Prompt del estudiante
+            context: Contexto adicional
+
+        Returns:
+            Diccionario con la respuesta y metadata
+        """
+        session = self.active_sessions.get(session_id)
+        if not session:
+            raise ValueError(f"Sesión {session_id} no encontrada")
+
+        student_id = session["student_id"]
+        activity_id = session["activity_id"]
+        current_mode = session["current_mode"]
+
+        # C2: Ingesta y Comprensión de Prompt (IPC)
+        classification = self.cognitive_engine.classify_prompt(
+            prompt,
+            context or {}
+        )
+
+        # C4: Gobernanza - verificar si debe bloquearse
+        should_block, block_reason = self.cognitive_engine.should_block_response(
+            classification
+        )
+
+        # C6: Registrar traza de entrada (N3/N4)
+        input_trace = self._create_trace(
+            session_id=session_id,
+            student_id=student_id,
+            activity_id=activity_id,
+            interaction_type=InteractionType.STUDENT_PROMPT,
+            content=prompt,
+            level=TraceLevel.N4_COGNITIVO,
+            cognitive_intent=classification.get("cognitive_state", "").value if classification.get("cognitive_state") else None,
+            context={"classification": classification}
+        )
+        self._add_trace(session_id, input_trace)
+
+        # Si debe bloquearse, retornar mensaje pedagógico
+        if should_block:
+            response = self._generate_blocked_response(block_reason, classification)
+
+            # Registrar la intervención
+            intervention_trace = self._create_trace(
+                session_id=session_id,
+                student_id=student_id,
+                activity_id=activity_id,
+                interaction_type=InteractionType.TUTOR_INTERVENTION,
+                content=response["message"],
+                level=TraceLevel.N4_COGNITIVO,
+                agent_id="GOV-IA"
+            )
+            self._add_trace(session_id, intervention_trace)
+
+            # Registrar riesgo detectado
+            self._register_risk(
+                student_id=student_id,
+                activity_id=activity_id,
+                risk_type=RiskType.COGNITIVE_DELEGATION,
+                risk_level=RiskLevel.HIGH,
+                dimension=RiskDimension.COGNITIVE,
+                description="Delegación total detectada en el prompt",
+                evidence=[prompt],
+                trace_ids=[input_trace.id]
+            )
+
+            return response
+
+        # C3: Generar estrategia pedagógica
+        student_history = self._get_student_history(student_id, activity_id)
+        strategy = self.cognitive_engine.generate_pedagogical_response_strategy(
+            prompt,
+            classification,
+            student_history
+        )
+
+        # C5: Orquestación - delegar al submodelo apropiado
+        if current_mode == AgentMode.TUTOR:
+            response = self._process_tutor_mode(
+                session_id, prompt, strategy, classification
+            )
+        elif current_mode == AgentMode.SIMULATOR:
+            response = self._process_simulator_mode(
+                session_id, prompt, strategy, classification
+            )
+        elif current_mode == AgentMode.EVALUATOR:
+            response = self._process_evaluator_mode(
+                session_id, prompt, strategy, classification
+            )
+        else:
+            response = {"message": "Modo no implementado", "metadata": {}}
+
+        # Registrar respuesta en trazas
+        response_trace = self._create_trace(
+            session_id=session_id,
+            student_id=student_id,
+            activity_id=activity_id,
+            interaction_type=InteractionType.AI_RESPONSE,
+            content=response["message"],
+            level=TraceLevel.N4_COGNITIVO,
+            agent_id=current_mode.value,
+            context={"strategy": strategy}
+        )
+        self._add_trace(session_id, response_trace)
+
+        # Análisis de riesgo en paralelo (AR-IA)
+        self._analyze_risks_async(session_id, input_trace, response_trace, classification)
+
+        return response
+
+    def _generate_blocked_response(
+        self,
+        reason: str,
+        classification: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Genera una respuesta pedagógica cuando se bloquea la solicitud"""
+        cognitive_state = classification.get("cognitive_state")
+
+        message = f"""
+He detectado que tu solicitud implica una delegación total del problema a la IA.
+
+{reason}
+
+Para poder ayudarte efectivamente, necesito que:
+
+1. **Expliques tu comprensión del problema**: ¿Qué te piden resolver?
+2. **Descompongas el problema**: ¿Qué partes identificas?
+3. **Compartas tu plan inicial**: ¿Cómo pensás abordarlo?
+4. **Identifiques tus dudas específicas**: ¿Qué parte específica te genera dificultad?
+
+Esto no es una limitación arbitraria: el objetivo es que desarrolles tu capacidad de razonamiento y resolución de problemas, que son competencias fundamentales.
+
+¿Podés reformular tu consulta siguiendo estas pautas?
+"""
+
+        return {
+            "message": message.strip(),
+            "blocked": True,
+            "reason": reason,
+            "requires_reformulation": True,
+            "metadata": {
+                "classification": classification,
+                "pedagogical_intent": "promote_autonomy"
+            }
+        }
+
+    def _process_tutor_mode(
+        self,
+        session_id: str,
+        prompt: str,
+        strategy: Dict[str, Any],
+        classification: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Procesa la interacción en modo T-IA-Cog (Tutor)
+
+        En el MVP, genera respuestas basadas en la estrategia pedagógica.
+        En producción, integraría con LLM real.
+        """
+        response_type = strategy["response_type"]
+
+        # Simulación de respuesta del tutor (en producción usaría LLM)
+        if response_type == "socratic_questioning":
+            message = self._generate_socratic_response(prompt, strategy)
+        elif response_type == "conceptual_explanation":
+            message = self._generate_conceptual_explanation(prompt, strategy)
+        elif response_type == "guided_hints":
+            message = self._generate_guided_hints(prompt, strategy)
+        else:
+            message = self._generate_clarification_request(prompt, strategy)
+
+        return {
+            "message": message,
+            "strategy": strategy,
+            "mode": "tutor",
+            "metadata": {
+                "response_type": response_type,
+                "cognitive_state": classification.get("cognitive_state", "").value if classification.get("cognitive_state") else None
+            }
+        }
+
+    def _generate_socratic_response(self, prompt: str, strategy: Dict[str, Any]) -> str:
+        """Genera respuesta socrática (preguntas guía)"""
+        return """
+Para ayudarte mejor, necesito entender tu proceso de pensamiento:
+
+1. ¿Qué entendés que te están pidiendo resolver en este problema?
+2. ¿Qué conceptos o estructuras de datos creés que podrían ser relevantes?
+3. ¿Podés describir en tus palabras cómo funcionaría una solución ideal?
+4. ¿Qué intentaste hasta ahora? ¿Por qué no funcionó?
+
+Una vez que compartas tu razonamiento, podré guiarte de manera más efectiva.
+"""
+
+    def _generate_conceptual_explanation(self, prompt: str, strategy: Dict[str, Any]) -> str:
+        """Genera explicación conceptual"""
+        return """
+Vamos a abordar esto desde los conceptos fundamentales:
+
+**Concepto clave**: [Concepto relevante al problema]
+
+**Principio**: [Principio fundamental]
+
+**Ejemplo simple**: [Ejemplo o analogía]
+
+**Aplicación**: Para tu problema específico, esto significa que...
+
+¿Tiene sentido hasta aquí? ¿Qué parte te gustaría que profundice?
+"""
+
+    def _generate_guided_hints(self, prompt: str, strategy: Dict[str, Any]) -> str:
+        """Genera pistas guiadas"""
+        return """
+Te voy a dar algunas pistas para que avances:
+
+**Pista 1**: Considerá descomponer el problema en estos subproblemas...
+
+**Pista 2**: Pensá en qué estructura de datos te permitiría...
+
+**Pista 3**: Recordá que necesitás considerar los casos de...
+
+**Próximo paso sugerido**: [Paso concreto]
+
+¿Con cuál de estas pistas querés que profundice? ¿Cuál es tu plan para el próximo paso?
+"""
+
+    def _generate_clarification_request(self, prompt: str, strategy: Dict[str, Any]) -> str:
+        """Solicita clarificación"""
+        return """
+Para poder ayudarte mejor, necesito que seas más específico:
+
+- ¿Qué parte exacta del problema te genera dificultad?
+- ¿Qué intentaste hasta ahora?
+- ¿Qué resultado esperabas vs. qué obtuviste?
+
+Por favor, reformulá tu pregunta con más detalles.
+"""
+
+    def _process_simulator_mode(
+        self,
+        session_id: str,
+        prompt: str,
+        strategy: Dict[str, Any],
+        classification: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Procesa interacción en modo S-IA-X (Simulador)"""
+        # Placeholder para simuladores
+        return {
+            "message": "[Modo Simulador - En desarrollo]",
+            "mode": "simulator",
+            "metadata": {}
+        }
+
+    def _process_evaluator_mode(
+        self,
+        session_id: str,
+        prompt: str,
+        strategy: Dict[str, Any],
+        classification: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Procesa interacción en modo E-IA-Proc (Evaluador)"""
+        # Placeholder para evaluador
+        return {
+            "message": "[Modo Evaluador - En desarrollo]",
+            "mode": "evaluator",
+            "metadata": {}
+        }
+
+    def _create_trace(
+        self,
+        session_id: str,
+        student_id: str,
+        activity_id: str,
+        interaction_type: InteractionType,
+        content: str,
+        level: TraceLevel,
+        **kwargs
+    ) -> CognitiveTrace:
+        """Crea una traza cognitiva"""
+        trace_id = str(uuid.uuid4())
+
+        return CognitiveTrace(
+            id=trace_id,
+            session_id=session_id,
+            student_id=student_id,
+            activity_id=activity_id,
+            trace_level=level,
+            interaction_type=interaction_type,
+            content=content,
+            **kwargs
+        )
+
+    def _add_trace(self, session_id: str, trace: CognitiveTrace) -> None:
+        """Añade una traza a la secuencia de la sesión"""
+        self.traces.append(trace)
+        if session_id in self.trace_sequences:
+            self.trace_sequences[session_id].add_trace(trace)
+
+    def _get_student_history(
+        self,
+        student_id: str,
+        activity_id: Optional[str] = None
+    ) -> List[CognitiveTrace]:
+        """Obtiene el historial de trazas del estudiante"""
+        history = [
+            t for t in self.traces
+            if t.student_id == student_id
+        ]
+
+        if activity_id:
+            history = [t for t in history if t.activity_id == activity_id]
+
+        return history
+
+    def _register_risk(
+        self,
+        student_id: str,
+        activity_id: str,
+        risk_type: RiskType,
+        risk_level: RiskLevel,
+        description: str,
+        evidence: List[str],
+        trace_ids: List[str],
+        **kwargs
+    ) -> Risk:
+        """Registra un riesgo detectado"""
+        risk = Risk(
+            id=str(uuid.uuid4()),
+            student_id=student_id,
+            activity_id=activity_id,
+            risk_type=risk_type,
+            risk_level=risk_level,
+            description=description,
+            evidence=evidence,
+            trace_ids=trace_ids,
+            **kwargs
+        )
+
+        # Añadir al reporte del estudiante
+        key = f"{student_id}_{activity_id}"
+        if key not in self.risks:
+            self.risks[key] = RiskReport(
+                id=f"report_{key}",
+                student_id=student_id,
+                activity_id=activity_id
+            )
+
+        self.risks[key].add_risk(risk)
+
+        return risk
+
+    def _analyze_risks_async(
+        self,
+        session_id: str,
+        input_trace: CognitiveTrace,
+        response_trace: CognitiveTrace,
+        classification: Dict[str, Any]
+    ) -> None:
+        """Análisis de riesgos asíncrono (AR-IA)"""
+        # En MVP es síncrono, en producción sería async
+        # Placeholder para análisis más sofisticado
+        pass
+
+    def get_trace_sequence(self, session_id: str) -> Optional[TraceSequence]:
+        """Obtiene la secuencia de trazas de una sesión"""
+        return self.trace_sequences.get(session_id)
+
+    def get_risk_report(self, student_id: str, activity_id: str) -> Optional[RiskReport]:
+        """Obtiene el reporte de riesgos"""
+        key = f"{student_id}_{activity_id}"
+        return self.risks.get(key)
+
+    def set_mode(self, session_id: str, mode: AgentMode) -> None:
+        """Cambia el modo operativo de una sesión"""
+        if session_id in self.active_sessions:
+            self.active_sessions[session_id]["current_mode"] = mode
+            self.cognitive_engine.set_mode(mode)

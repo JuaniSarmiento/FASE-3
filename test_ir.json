@@ -1,0 +1,5 @@
+{
+  "session_id": "47cfed13-839e-43ad-a04d-bae25f570f72",
+  "simulator_type": "incident_responder",
+  "prompt": "Mi hipotesis es memory leak. Ejecutaria jmap -heap para analizar, aumentaria heap a 8GB, reiniciaria servicio."
+}
