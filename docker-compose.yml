@@ -190,8 +190,8 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      # Montar modelos de Ollama del host (no descargar de nuevo)
-      - C:\Users\juani\.ollama:/root/.ollama
+      # Volumen persistente para modelos de Ollama
+      - ollama_data:/root/.ollama
     networks:
       - ai-native-network
     restart: unless-stopped

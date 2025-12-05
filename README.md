@@ -1,90 +1,332 @@
-# AI-Native MVP - Sistema Completo y Certificado
+# AI-Native MVP - Sistema Educativo con IA
 
-**Estado**: ✅ **PROYECTO COMPLETO Y CERTIFICADO** (2025-11-24)
+**Estado**: ✅ **PROYECTO COMPLETO Y LISTO PARA USO**
 
 [![Test Coverage](https://img.shields.io/badge/coverage-73%25-brightgreen.svg)](tests/)
-[![SUS Score](https://img.shields.io/badge/SUS-72.5-brightgreen.svg)](user-acceptance-testing/UAT_SIMULATION_REPORT.md)
 [![Security](https://img.shields.io/badge/security-0%20critical-brightgreen.svg)](security-audit/SECURITY_AUDIT_COMPLETADO.md)
-[![SLA Compliance](https://img.shields.io/badge/SLA-94%25-brightgreen.svg)](load-testing/LOAD_TESTING_COMPLETADO.md)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)]()
+[![LLM](https://img.shields.io/badge/LLM-Phi--3-orange.svg)]()
 
 ---
 
-## 🎯 Resumen Ejecutivo
+## 🎯 ¿Qué es AI-Native?
 
-El **AI-Native MVP** es un sistema revolucionario para la enseñanza-aprendizaje de programación en la era de la IA generativa. El proyecto ha sido **completado exitosamente** con todas las fases certificadas y listo para lanzamiento en beta cerrada.
+Sistema revolucionario de enseñanza-aprendizaje de programación potenciado por IA generativa. Incluye:
 
-### ✅ Estado de Certificación
-
-- ✅ **11/11 fases completadas** (100%)
-- ✅ **20/20 métricas de éxito alcanzadas** (100%)
-- ✅ **6/6 agentes AI-Native funcionando** (100%)
-- ✅ **94 tests pasando con 73% coverage** (>70% target)
-- ✅ **0 vulnerabilidades critical** en security audit
-- ✅ **94% SLA compliance** en load testing
-- ✅ **SUS Score 72.5** (target ≥70)
-- ✅ **57,500+ líneas** de código y documentación
-
-**Certificación completa**: Ver [CERTIFICACION_PROYECTO_COMPLETO.md](CERTIFICACION_PROYECTO_COMPLETO.md)
+- **6 Agentes IA especializados** (Tutor, Evaluador, Simuladores, Risk, Governance, Trazabilidad)
+- **Integración LLM real** (Ollama + Phi-3, 100% local y gratuito)
+- **Backend FastAPI** con PostgreSQL + Redis
+- **Frontend React moderno** con TypeScript
+- **Docker Compose** para ejecución con 1 comando
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Instalación y Ejecución
 
-### Opción 1: Desarrollo Local con Ollama (Recomendado - Gratis)
+### **Requisitos Previos**
 
-```bash
-# 1. Instalar Ollama
-# Windows: https://ollama.ai/download/windows
-# Linux: curl -fsSL https://ollama.ai/install.sh | sh
-# macOS: brew install ollama
+- **Docker Desktop** ([Descargar](https://www.docker.com/products/docker-desktop))
+- **Git** ([Descargar](https://git-scm.com/downloads))
+- (Opcional) **Node.js 18+** para desarrollo del frontend
 
-# 2. Descargar modelo
-ollama pull llama2  # o mistral, codellama, etc.
-
-# 3. Clonar repositorio
-git clone <repo-url>
-cd Fase2py
-
-# 4. Configurar entorno
-cp .env.example .env
-# Editar .env si es necesario (defaults funcionan)
-
-# 5. Activar entorno virtual
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # Linux/macOS
-
-# 6. Instalar dependencias
-pip install -r requirements.txt
-
-# 7. Inicializar base de datos
-python scripts/init_database.py
-
-# 8. Iniciar Ollama (si no se inició automáticamente)
-ollama serve
-
-# 9. Iniciar backend API
-python scripts/run_api.py
-
-# ✅ Backend: http://localhost:8000
-# ✅ API Docs: http://localhost:8000/docs
-# ✅ Ollama: http://localhost:11434
-```
-
-### Opción 2: Docker (Todo incluido)
+### **Instalación Rápida (5 minutos)**
 
 ```bash
-# 1. Iniciar stack completo (API + PostgreSQL + Redis + Ollama)
-docker-compose --profile ollama up -d
+# 1. Clonar el repositorio
+git clone https://github.com/JuaniSarmiento/AI-NATIVE.git
+cd AI-NATIVE
 
-# 2. Descargar modelo en container
-docker-compose exec ollama ollama pull llama2
+# 2. Levantar toda la aplicación (backend + database + LLM)
+docker-compose up -d
 
-# 3. Verificar
-curl http://localhost:8000/api/v1/health
+# 3. Esperar a que el modelo Phi-3 se descargue (solo primera vez, ~2GB)
+# Ver progreso con:
+docker-compose logs -f ollama
 
-# ✅ Backend: http://localhost:8000
-# ✅ API Docs: http://localhost:8000/docs
+# 4. Verificar que todo está corriendo
+docker-compose ps
+
+# ✅ Backend listo en: http://localhost:8000/docs
 ```
+
+### **Frontend (Opcional)**
+
+```bash
+cd frontEnd
+npm install
+npm run dev
+
+# ✅ Frontend listo en: http://localhost:3001
+```
+
+---
+
+## 🎮 Uso de la Aplicación
+
+### **Acceso a Interfaces**
+
+| Servicio | URL | Credenciales |
+|----------|-----|--------------|
+| **Frontend** | http://localhost:3001 | - |
+| **API Docs (Swagger)** | http://localhost:8000/docs | - |
+| **API Health** | http://localhost:8000/api/v1/health | - |
+| **pgAdmin** | http://localhost:5050 | admin@ai-native.local / admin |
+
+### **Ejemplo de Uso - Modo Tutor**
+
+1. Abre http://localhost:3001/tutor
+2. Escribe una pregunta: *"¿Qué es una base de datos relacional?"*
+3. El agente T-IA-Cog responderá usando Phi-3 con explicaciones pedagógicas
+4. Prueba diferentes modos: Socrático, Explicativo, Guiado, Metacognitivo
+
+### **Ejemplo via API**
+
+```bash
+# Crear sesión
+curl -X POST http://localhost:8000/api/v1/sessions \
+  -H "Content-Type: application/json" \
+  -d '{"student_id": "estudiante1", "mode": "TUTOR"}'
+
+# Respuesta: {"session_id": "abc-123-...", ...}
+
+# Enviar pregunta al tutor
+curl -X POST http://localhost:8000/api/v1/interactions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "abc-123-...",
+    "prompt": "¿Qué es recursividad?",
+    "interaction_type": "tutor_query"
+  }'
+
+# Respuesta del agente T-IA-Cog con explicación generada por Phi-3
+```
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+### **Stack Tecnológico**
+
+**Backend:**
+- FastAPI 0.104.1 (Python 3.11)
+- PostgreSQL 15 (base de datos)
+- Redis 7.4.7 (cache + rate limiting)
+- SQLAlchemy 2.0 (ORM)
+- Pydantic 2.5 (validación)
+
+**LLM:**
+- Ollama (servidor local)
+- Phi-3 (modelo 2.2GB, gratis)
+- Langchain (orquestación opcional)
+
+**Frontend:**
+- React 18.2 + TypeScript
+- Vite 5.4.21
+- React Router 6.28.0
+- Axios para API calls
+- React Markdown (renderizado de respuestas)
+
+**Infraestructura:**
+- Docker + Docker Compose
+- 5 contenedores: api, postgres, redis, ollama, pgadmin
+
+### **Agentes IA Implementados**
+
+| Agente | Código | Función |
+|--------|--------|---------|
+| **T-IA-Cog** | Tutor Cognitivo | Respuestas pedagógicas adaptativas |
+| **E-IA-Proc** | Evaluador Procedimental | Análisis de código y feedback |
+| **S-IA-X** | Simuladores | Entornos de práctica (Git, SQL, Bash) |
+| **AR-IA** | Análisis de Riesgo | Detecta plagios y malas prácticas |
+| **GOV-IA** | Governance | Auditoría y políticas pedagógicas |
+| **TC-N4** | Trazabilidad | Historial y métricas de aprendizaje |
+
+---
+
+## 📦 Comandos Útiles
+
+### **Docker**
+
+```bash
+# Ver logs en tiempo real
+docker-compose logs -f api
+
+# Reiniciar un servicio
+docker-compose restart api
+
+# Entrar a un contenedor
+docker-compose exec api bash
+
+# Detener todo
+docker-compose down
+
+# Detener y borrar volúmenes (⚠️ borra la BD)
+docker-compose down -v
+
+# Ver estado de servicios
+docker-compose ps
+```
+
+### **Base de Datos**
+
+```bash
+# Conectar a PostgreSQL
+docker-compose exec postgres psql -U ai_native
+
+# Backup
+docker-compose exec postgres pg_dump -U ai_native ai_native > backup.sql
+
+# Restore
+docker-compose exec -T postgres psql -U ai_native < backup.sql
+```
+
+### **Testing**
+
+```bash
+# Backend tests
+pytest tests/ -v --cov=backend
+
+# Test específico
+pytest tests/test_ai_gateway.py::test_tutor_mode -v
+
+# Coverage report
+pytest --cov=backend --cov-report=html
+```
+
+---
+
+## 🔧 Configuración Avanzada
+
+### **Variables de Entorno (.env)**
+
+```env
+# LLM Provider
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://ollama:11434
+OLLAMA_MODEL=phi3
+OLLAMA_TIMEOUT=120
+
+# Database
+DATABASE_URL=postgresql://ai_native:ai_native_password@postgres:5432/ai_native
+DB_POOL_SIZE=80
+
+# Redis
+REDIS_URL=redis://redis:6379/0
+LLM_CACHE_ENABLED=true
+LLM_CACHE_TTL=3600
+
+# Security
+JWT_SECRET_KEY=<generar con: openssl rand -hex 32>
+ENVIRONMENT=development
+```
+
+### **Cambiar Modelo LLM**
+
+```bash
+# Ver modelos disponibles en Ollama
+docker-compose exec ollama ollama list
+
+# Descargar otro modelo
+docker-compose exec ollama ollama pull codellama
+docker-compose exec ollama ollama pull mistral
+
+# Cambiar en .env
+OLLAMA_MODEL=mistral
+```
+
+---
+
+## 📚 Documentación Adicional
+
+- [GUIA_ESTUDIANTE.md](GUIA_ESTUDIANTE.md) - Cómo usar la plataforma
+- [GUIA_DOCENTE.md](GUIA_DOCENTE.md) - Gestión de cursos
+- [GUIA_ADMINISTRADOR.md](GUIA_ADMINISTRADOR.md) - Deployment y monitoreo
+- [GUIA_INTEGRACION_LLM.md](GUIA_INTEGRACION_LLM.md) - Integrar otros LLMs
+- [README_API.md](README_API.md) - Referencia completa de API
+- [CERTIFICACION_PROYECTO_COMPLETO.md](CERTIFICACION_PROYECTO_COMPLETO.md) - Estado del proyecto
+
+---
+
+## 🐛 Troubleshooting
+
+### **El backend no inicia**
+
+```bash
+docker-compose logs api
+# Ver error específico y revisar variables de entorno
+```
+
+### **Ollama no responde / timeout**
+
+```bash
+# Verificar que el modelo esté descargado
+docker-compose exec ollama ollama list
+
+# Descargar si falta
+docker-compose exec ollama ollama pull phi3
+
+# Aumentar timeout en .env
+OLLAMA_TIMEOUT=180
+```
+
+### **Frontend no conecta con backend**
+
+```bash
+# Verificar CORS en frontend/vite.config.ts
+# Debe tener proxy configurado a http://localhost:8000
+```
+
+### **Base de datos no conecta**
+
+```bash
+# Verificar que postgres esté healthy
+docker-compose ps
+
+# Reiniciar postgres
+docker-compose restart postgres
+
+# Ver logs
+docker-compose logs postgres
+```
+
+---
+
+## 🤝 Contribución
+
+Este es un proyecto de tesis educativo. Para contribuir:
+
+1. Fork del repositorio
+2. Crear branch: `git checkout -b feature/nueva-funcionalidad`
+3. Commit: `git commit -m 'Agrega nueva funcionalidad'`
+4. Push: `git push origin feature/nueva-funcionalidad`
+5. Crear Pull Request
+
+---
+
+## 📄 Licencia
+
+MIT License - Ver [LICENSE](LICENSE) para más detalles.
+
+---
+
+## 👤 Autor
+
+**Juan Ignacio Sarmiento**
+- GitHub: [@JuaniSarmiento](https://github.com/JuaniSarmiento)
+- Proyecto: Tesis de Grado - Sistema AI-Native para Enseñanza de Programación
+
+---
+
+## ⭐ Métricas del Proyecto
+
+- ✅ **94 tests pasando** (73% coverage)
+- ✅ **0 vulnerabilidades críticas**
+- ✅ **6 agentes IA funcionando**
+- ✅ **57,500+ líneas de código**
+- ✅ **100% Docker-ready**
+- ✅ **SLA 94% compliance**
+
+**¿Tienes preguntas?** Abre un [Issue](https://github.com/JuaniSarmiento/AI-NATIVE/issues) en GitHub.
 
 ---
 

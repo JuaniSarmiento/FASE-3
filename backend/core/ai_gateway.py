@@ -405,7 +405,10 @@ Esto no es una limitación arbitraria: el objetivo es que desarrolles tu capacid
         - Guarda respuesta en cache después de generarla
         - Ahorra costos de LLM (30-50% en prompts repetidos)
         """
-        response_type = strategy["response_type"]
+        response_type = strategy.get("response_type", "unknown")
+        
+        # Log para debugging
+        logger.info(f"Processing tutor mode - response_type: '{response_type}'")
 
         # Preparar contexto para cache key
         cache_context = {
@@ -442,7 +445,9 @@ Esto no es una limitación arbitraria: el objetivo es que desarrolles tu capacid
             elif response_type == "guided_hints":
                 message = await self._generate_guided_hints(prompt, strategy)
             else:
-                message = self._generate_clarification_request(prompt, strategy)
+                # Fallback: usar explicación conceptual para casos no clasificados
+                logger.warning(f"Unknown response_type '{response_type}', using conceptual_explanation")
+                message = await self._generate_conceptual_explanation(prompt, strategy)
 
             # Guardar en cache para futuras solicitudes idénticas
             if self.cache is not None:

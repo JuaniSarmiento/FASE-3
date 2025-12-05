@@ -76,8 +76,8 @@ class CognitiveReasoningEngine:
         question_signals = ["cómo", "por qué", "qué", "cuál", "explica", "ayuda"]
         is_question = any(signal in prompt_lower for signal in question_signals)
 
-        # Detectar solicitud de explicación
-        explanation_signals = ["explica", "no entiendo", "ayuda a entender", "por qué"]
+        # Detectar solicitud de explicación (incluye preguntas "qué es")
+        explanation_signals = ["explica", "no entiendo", "ayuda a entender", "por qué", "qué es", "qué son"]
         requests_explanation = any(signal in prompt_lower for signal in explanation_signals)
 
         # Determinar estado cognitivo
@@ -110,6 +110,10 @@ class CognitiveReasoningEngine:
         requests_explanation: bool
     ) -> str:
         """Determina el tipo de respuesta apropiada"""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Determining response type: delegation={is_delegation}, question={is_question}, explanation={requests_explanation}")
+        
         if is_delegation:
             return "socratic_questioning"  # Preguntas socráticas
         elif requests_explanation:
