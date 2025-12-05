@@ -17,22 +17,22 @@ import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.ai_native_mvp.core.ai_gateway import AIGateway
-from src.ai_native_mvp.core.cognitive_engine import CognitiveReasoningEngine, CognitiveState
-from src.ai_native_mvp.agents.tutor import TutorCognitivoAgent
-from src.ai_native_mvp.agents.risk_analyst import AnalistaRiesgoAgent
-from src.ai_native_mvp.agents.evaluator import EvaluadorProcesosAgent
-from src.ai_native_mvp.agents.traceability import TrazabilidadN4Agent
-from src.ai_native_mvp.llm.mock import MockLLMProvider
-from src.ai_native_mvp.database import get_db_session
-from src.ai_native_mvp.database.repositories import (
+from backend.core.ai_gateway import AIGateway
+from backend.core.cognitive_engine import CognitiveReasoningEngine, CognitiveState
+from backend.agents.tutor import TutorCognitivoAgent
+from backend.agents.risk_analyst import AnalistaRiesgoAgent
+from backend.agents.evaluator import EvaluadorProcesosAgent
+from backend.agents.traceability import TrazabilidadN4Agent
+from backend.llm.mock import MockLLMProvider
+from backend.database import get_db_session
+from backend.database.repositories import (
     SessionRepository,
     TraceRepository,
     RiskRepository,
     EvaluationRepository,
     TraceSequenceRepository,
 )
-from src.ai_native_mvp.models.risk import RiskLevel, RiskType
+from backend.models.risk import RiskLevel, RiskType
 
 
 @pytest.fixture
@@ -223,7 +223,7 @@ class TestCompleteStudentFlow:
         evaluator = EvaluadorProcesosAgent(llm_provider=MockLLMProvider())
 
         # Convertir ORM traces a Pydantic
-        from src.ai_native_mvp.models.trace import CognitiveTrace, TraceLevel, InteractionType
+        from backend.models.trace import CognitiveTrace, TraceLevel, InteractionType
         pydantic_traces = []
         for t in all_traces:
             pydantic_traces.append(
@@ -398,7 +398,7 @@ class TestStudentFlowWithSimulators:
         """
         Test E2E: Estudiante usa simulador de entrevista técnica (IT-IA)
         """
-        from src.ai_native_mvp.agents.simulators import SimuladorProfesionalAgent
+        from backend.agents.simulators import SimuladorProfesionalAgent
 
         student_id = "student_e2e_004"
         activity_id = "prog2_entrevista_tecnica"

@@ -12,25 +12,25 @@ from datetime import datetime
 from typing import Dict, Any, List
 from uuid import uuid4
 
-from src.ai_native_mvp.models.trace import (
+from backend.models.trace import (
     CognitiveTrace,
     TraceSequence,
     TraceLevel,
     InteractionType,
 )
-from src.ai_native_mvp.core.cognitive_engine import CognitiveState
-from src.ai_native_mvp.models.risk import (
+from backend.core.cognitive_engine import CognitiveState
+from backend.models.risk import (
     Risk,
     RiskType,
     RiskLevel,
     RiskDimension,
 )
-from src.ai_native_mvp.models.evaluation import (
+from backend.models.evaluation import (
     EvaluationReport,
     CompetencyLevel,
     EvaluationDimension,
 )
-from src.ai_native_mvp.llm.base import LLMProvider, LLMMessage, LLMRole, LLMResponse
+from backend.llm.base import LLMProvider, LLMMessage, LLMRole, LLMResponse
 
 
 # ============================================================================
@@ -132,7 +132,7 @@ def session_id() -> str:
 def db_engine():
     """Fixture providing a test database engine (module scope)"""
     from sqlalchemy import create_engine
-    from src.ai_native_mvp.database.base import Base
+    from backend.database.base import Base
 
     # Create in-memory SQLite database
     engine = create_engine("sqlite:///:memory:", echo=False)
@@ -314,7 +314,7 @@ def sample_risk_superficial() -> Risk:
 @pytest.fixture
 def sample_evaluation_report(student_id: str, activity_id: str) -> EvaluationReport:
     """Fixture providing a sample evaluation report"""
-    from src.ai_native_mvp.models.evaluation import ReasoningAnalysis
+    from backend.models.evaluation import ReasoningAnalysis
 
     return EvaluationReport(
         id=f"eval_{uuid4()}",

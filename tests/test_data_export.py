@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from src.ai_native_mvp.export import (
+from backend.export import (
     DataAnonymizer,
     AnonymizationConfig,
     ResearchDataExporter,

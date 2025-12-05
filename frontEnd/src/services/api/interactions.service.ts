@@ -18,7 +18,12 @@ class InteractionsService extends BaseApiService {
    * Este es el endpoint principal que orquesta todo el flujo AI-Native
    */
   async process(data: InteractionRequest): Promise<InteractionResponse> {
-    return this.post<InteractionResponse, InteractionRequest>('', data);
+    const response = await this.post<any, InteractionRequest>('', data);
+    // Backend wraps response in {success, data}
+    if (response.success && response.data) {
+      return response.data;
+    }
+    return response;
   }
 
   /**

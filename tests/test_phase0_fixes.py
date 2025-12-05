@@ -10,15 +10,15 @@ Verifies that the 4 critical corrections applied prevent runtime errors:
 import pytest
 from datetime import datetime, timezone
 
-from src.ai_native_mvp.database.models import CognitiveTraceDB, SessionDB, EvaluationDB
-from src.ai_native_mvp.core.cognitive_engine import AgentMode
-from src.ai_native_mvp.models.evaluation import (
+from backend.database.models import CognitiveTraceDB, SessionDB, EvaluationDB
+from backend.core.cognitive_engine import AgentMode
+from backend.models.evaluation import (
     EvaluationReport,
     CompetencyLevel,
     EvaluationDimension,
     ReasoningAnalysis,
 )
-from src.ai_native_mvp.database.repositories import EvaluationRepository
+from backend.database.repositories import EvaluationRepository
 
 
 # =============================================================================
@@ -163,7 +163,7 @@ def test_session_mode_alias_backward_compatibility():
     BEFORE FIX: SessionMode was separate enum with duplicate values
     AFTER FIX: SessionMode = AgentMode (alias)
     """
-    from src.ai_native_mvp.api.schemas.enums import SessionMode
+    from backend.api.schemas.enums import SessionMode
 
     # SessionMode should be the same as AgentMode
     assert SessionMode is AgentMode, "SessionMode should be alias to AgentMode"
@@ -356,7 +356,7 @@ def db_session():
     """Create in-memory SQLite database for testing"""
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
-    from src.ai_native_mvp.database.base import Base
+    from backend.database.base import Base
 
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)

@@ -30,73 +30,114 @@ El **AI-Native MVP** es un sistema revolucionario para la enseñanza-aprendizaje
 
 ## 🚀 Quick Start
 
-### Opción 1: Desarrollo Local (Más Rápido)
+### Opción 1: Desarrollo Local con Ollama (Recomendado - Gratis)
 
 ```bash
-# 1. Clonar repositorio
-git clone <repo-url>
-cd Tesis
+# 1. Instalar Ollama
+# Windows: https://ollama.ai/download/windows
+# Linux: curl -fsSL https://ollama.ai/install.sh | sh
+# macOS: brew install ollama
 
-# 2. Activar entorno virtual
+# 2. Descargar modelo
+ollama pull llama2  # o mistral, codellama, etc.
+
+# 3. Clonar repositorio
+git clone <repo-url>
+cd Fase2py
+
+# 4. Configurar entorno
+cp .env.example .env
+# Editar .env si es necesario (defaults funcionan)
+
+# 5. Activar entorno virtual
 .venv\Scripts\activate  # Windows
 source .venv/bin/activate  # Linux/macOS
 
-# 3. Instalar dependencias
+# 6. Instalar dependencias
 pip install -r requirements.txt
 
-# 4. Inicializar base de datos
+# 7. Inicializar base de datos
 python scripts/init_database.py
 
-# 5. Iniciar backend API
+# 8. Iniciar Ollama (si no se inició automáticamente)
+ollama serve
+
+# 9. Iniciar backend API
 python scripts/run_api.py
 
-# 6. (Opcional) Iniciar frontend
-cd frontEnd
-npm install
-npm run dev
-
 # ✅ Backend: http://localhost:8000
-# ✅ Frontend: http://localhost:3000
 # ✅ API Docs: http://localhost:8000/docs
+# ✅ Ollama: http://localhost:11434
 ```
 
-### Opción 2: Kubernetes Staging (Producción-like)
+### Opción 2: Docker (Todo incluido)
 
 ```bash
-# 1. Pre-requisitos: kubectl + k8s cluster configurado
+# 1. Iniciar stack completo (API + PostgreSQL + Redis + Ollama)
+docker-compose --profile ollama up -d
 
-# 2. Deployment automatizado
-cd kubernetes/staging
-./deploy.sh
+# 2. Descargar modelo en container
+docker-compose exec ollama ollama pull llama2
 
-# 3. Verificar deployment
-./verify.sh
+# 3. Verificar
+curl http://localhost:8000/api/v1/health
 
-# 4. Monitorear sistema
-./monitor.sh
-
-# ✅ Ingress: https://staging.ai-native.example.com
+# ✅ Backend: http://localhost:8000
+# ✅ API Docs: http://localhost:8000/docs
 ```
 
 ---
 
-## 📦 ¿Qué incluye este proyecto?
+## 📦 Estructura del Proyecto
 
-### 1. Sistema Core
+```
+phoenix-mvp/
+├── backend/                    # Backend principal (FastAPI + Python)
+│   ├── agents/                 # 6 Agentes AI-Native
+│   ├── api/                    # REST API (15+ endpoints)
+│   ├── core/                   # Lógica de negocio central
+│   ├── database/               # Modelos y repositorios ORM
+│   ├── llm/                    # Proveedor LLM (Ollama + Mock)
+│   ├── models/                 # Modelos de dominio
+│   ├── services/               # Servicios de aplicación
+│   └── export/                 # Exportación de datos
+│
+├── frontend/                   # Frontend (React/Next.js - futuro)
+│
+├── tests/                      # Tests unitarios e integración
+│   ├── test_agents.py
+│   ├── test_llm_factory.py
+│   ├── test_ollama_provider.py
+│   └── ...
+│
+├── devops/                     # Herramientas DevOps
+│   ├── kubernetes/             # Deployment K8s
+│   ├── scripts/                # Scripts de utilidad
+│   ├── load-testing/           # Tests de carga (Locust)
+│   ├── security-audit/         # Auditoría de seguridad
+│   └── monitoring/             # Prometheus + Grafana
+│
+├── docs/                       # Documentación completa
+│   ├── README.md               # Índice de documentación
+│   ├── architecture/           # Docs de arquitectura
+│   ├── deployment/             # Guías de deployment
+│   ├── guides/                 # Guías por rol de usuario
+│   ├── llm/                    # Guías de Ollama/LLM
+│   ├── api/                    # API Reference
+│   ├── testing/                # Docs de testing
+│   ├── security/               # Docs de seguridad
+│   └── project/                # Gestión de proyecto
+│
+├── uat/                        # User Acceptance Testing
+├── examples/                   # Ejemplos de uso
+├── docker-compose.yml          # Orquestación de servicios
+├── Dockerfile                  # Imagen Docker del backend
+├── requirements.txt            # Dependencias Python
+├── pytest.ini                  # Configuración de tests
+├── .env.example                # Template de variables de entorno
+└── README.md                   # Este archivo
+```
 
-#### Backend (Python + FastAPI)
-- **6 Agentes AI-Native**:
-  - 🤖 **T-IA-Cog**: Tutor Cognitivo Socrático
-  - 📊 **E-IA-Proc**: Evaluador de Procesos Cognitivos
-  - 👥 **S-IA-X**: 6 Simuladores Profesionales (PO, SM, IT, IR, CX, DSO)
-  - ⚠️ **AR-IA**: Analista de Riesgos (5 dimensiones)
-  - 🛡️ **GOV-IA**: Gobernanza Institucional
-  - 🔍 **TC-N4**: Trazabilidad Cognitiva Nivel 4
-
-- **Arquitectura C4 Extended** (6 componentes)
-- **REST API** (15+ endpoints + OpenAPI docs)
-- **Base de Datos** (9 tablas + 16 índices)
-- **LLM Providers** (Mock, OpenAI, Gemini)
 
 #### Frontend (React + TypeScript)
 - **Chatbot interactivo** con tutor socrático
@@ -190,7 +231,7 @@ cd kubernetes/staging
 ### Contribuciones Técnicas
 
 1. ✅ **Arquitectura C4 Extended** con dimensión cognitivo-pedagógica
-2. ✅ **LLM Provider Abstraction** (Mock, OpenAI, Gemini)
+2. ✅ **LLM Provider Abstraction** (Mock, OpenAI, Gemini, **Ollama**)
 3. ✅ **Repository Pattern** para clean architecture
 4. ✅ **Privacy-First Export** (k-anonymity ≥5, GDPR compliant)
 5. ✅ **Kubernetes-ready** con HPA + monitoring
@@ -251,6 +292,7 @@ cd kubernetes/staging
 **Para Desarrolladores:**
 - **[README_API.md](README_API.md)** (400 líneas) - REST API documentation con OpenAPI
 - **[GUIA_INTEGRACION_LLM.md](GUIA_INTEGRACION_LLM.md)** (500 líneas) - Integración de proveedores LLM (OpenAI, Gemini)
+- **[OLLAMA_INTEGRATION_GUIDE.md](OLLAMA_INTEGRATION_GUIDE.md)** - **NUEVO**: Guía completa de integración con Ollama (LLMs locales)
 - **[IMPLEMENTACIONES_ARQUITECTURALES.md](IMPLEMENTACIONES_ARQUITECTURALES.md)** - Mejoras arquitectónicas aplicadas
 
 **Para Estudiantes:**

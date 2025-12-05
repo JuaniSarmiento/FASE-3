@@ -1,13 +1,29 @@
 /**
- * Página para estudiantes - Vista de chat con el tutor AI
+ * Página para estudiantes - Redirige al dashboard
  */
-import { ChatProvider } from '@/contexts/ChatContext';
-import { ChatContainer } from '@/components/Chat/ChatContainer';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function StudentPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/dashboard');
+  }, [navigate]);
+
   return (
-    <ChatProvider>
-      <ChatContainer />
-    </ChatProvider>
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      height: '100vh',
+      background: '#0f172a',
+      color: '#e2e8f0'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <h1>🎓 Estudiante</h1>
+        <p>Redirigiendo al dashboard...</p>
+      </div>
+    </div>
   );
 }

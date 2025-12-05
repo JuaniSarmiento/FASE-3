@@ -9,7 +9,7 @@ Tests cover:
 - Response type selection
 """
 import pytest
-from src.ai_native_mvp.core.cognitive_engine import (
+from backend.core.cognitive_engine import (
     CognitiveReasoningEngine,
     AgentMode,
     CognitiveState,

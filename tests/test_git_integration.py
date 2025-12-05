@@ -20,16 +20,16 @@ except ImportError:
     GIT_AVAILABLE = False
     pytestmark = pytest.mark.skip(reason="GitPython not installed")
 
-from src.ai_native_mvp.agents.git_integration import GitIntegrationAgent
-from src.ai_native_mvp.models.git_trace import (
+from backend.agents.git_integration import GitIntegrationAgent
+from backend.models.git_trace import (
     GitTrace,
     GitEventType,
     GitFileChange,
     CodePattern,
     CodeEvolution,
 )
-from src.ai_native_mvp.models.trace import CognitiveTrace, InteractionType, TraceLevel
-from src.ai_native_mvp.core.cognitive_engine import CognitiveState
+from backend.models.trace import CognitiveTrace, InteractionType, TraceLevel
+from backend.core.cognitive_engine import CognitiveState
 
 
 @pytest.fixture

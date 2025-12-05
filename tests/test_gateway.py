@@ -11,9 +11,9 @@ Tests cover:
 import pytest
 from uuid import UUID
 
-from src.ai_native_mvp.core.ai_gateway import AIGateway
-from src.ai_native_mvp.core.cognitive_engine import AgentMode, CognitiveState
-from src.ai_native_mvp.models.trace import TraceLevel
+from backend.core.ai_gateway import AIGateway
+from backend.core.cognitive_engine import AgentMode, CognitiveState
+from backend.models.trace import TraceLevel
 
 
 @pytest.mark.unit

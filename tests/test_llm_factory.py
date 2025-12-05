@@ -15,9 +15,9 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from src.ai_native_mvp.llm.factory import LLMProviderFactory
-from src.ai_native_mvp.llm.base import LLMProvider
-from src.ai_native_mvp.llm.mock import MockLLMProvider
+from backend.llm.factory import LLMProviderFactory
+from backend.llm.base import LLMProvider
+from backend.llm.mock import MockLLMProvider
 
 
 class TestLLMProviderFactoryBasics:
@@ -382,7 +382,7 @@ class TestLLMProviderFactoryIntegration:
         provider = LLMProviderFactory.create_from_env("mock")
 
         # Generar respuesta
-        from src.ai_native_mvp.llm.base import LLMMessage, LLMRole
+        from backend.llm.base import LLMMessage, LLMRole
         messages = [
             LLMMessage(role=LLMRole.USER, content="Test message")
         ]

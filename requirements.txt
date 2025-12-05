@@ -1,11 +1,8 @@
 # Core dependencies
-openai>=1.12.0
-tiktoken>=0.5.2  # For token counting with OpenAI models
-anthropic>=0.18.0
-google-generativeai>=0.3.0  # For Google Gemini models
 pydantic>=2.6.0
 pydantic-settings>=2.1.0
 python-dotenv>=1.0.0
+httpx>=0.26.0  # For Ollama HTTP requests
 
 # CLI dependencies
 rich>=13.7.0
@@ -14,6 +11,7 @@ typer>=0.9.0
 # Database dependencies
 sqlalchemy>=2.0.25
 alembic>=1.13.1
+psycopg2-binary>=2.9.9  # PostgreSQL adapter
 
 # FastAPI dependencies
 fastapi>=0.109.0

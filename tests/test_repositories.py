@@ -15,27 +15,27 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.ai_native_mvp.database.models import Base
-from src.ai_native_mvp.database.repositories import (
+from backend.database.models import Base
+from backend.database.repositories import (
     SessionRepository,
     TraceRepository,
     RiskRepository,
     EvaluationRepository,
     TraceSequenceRepository,
 )
-from src.ai_native_mvp.models.trace import (
+from backend.models.trace import (
     CognitiveTrace,
     TraceLevel,
     InteractionType,
     TraceSequence,
 )
-from src.ai_native_mvp.models.risk import Risk, RiskType, RiskLevel, RiskDimension
-from src.ai_native_mvp.models.evaluation import (
+from backend.models.risk import Risk, RiskType, RiskLevel, RiskDimension
+from backend.models.evaluation import (
     EvaluationReport,
     CompetencyLevel,
     EvaluationDimension,
 )
-from src.ai_native_mvp.core.cognitive_engine import CognitiveState
+from backend.core.cognitive_engine import CognitiveState
 
 
 # ============================================================================
@@ -483,7 +483,7 @@ def test_evaluation_create(evaluation_repo, session_repo):
     session = session_repo.create("student_001", "prog2_tp1", "TUTOR")
 
     # Create evaluation
-    from src.ai_native_mvp.models.evaluation import ReasoningAnalysis
+    from backend.models.evaluation import ReasoningAnalysis
 
     evaluation = EvaluationReport(
         id=str(uuid4()),
@@ -530,7 +530,7 @@ def test_evaluation_get_by_session(evaluation_repo, session_repo):
     session = session_repo.create("student_001", "prog2_tp1", "TUTOR")
 
     # Create evaluation
-    from src.ai_native_mvp.models.evaluation import ReasoningAnalysis
+    from backend.models.evaluation import ReasoningAnalysis
 
     evaluation = EvaluationReport(
         id=str(uuid4()),

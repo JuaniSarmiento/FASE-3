@@ -56,7 +56,7 @@ FROM python:3.11-slim
 # Variables de entorno para Python
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH=/root/.local/bin:$PATH
+    PATH=/home/appuser/.local/bin:$PATH
 
 # Instalar dependencias runtime (solo librerías, no compiladores)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -71,11 +71,11 @@ RUN useradd -m -u 1000 -s /bin/bash appuser
 # Crear directorio de aplicación
 WORKDIR /app
 
-# Copiar dependencias instaladas desde builder
-COPY --from=builder /root/.local /root/.local
+# Copiar dependencias instaladas desde builder al home del appuser
+COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 
 # Copiar código fuente
-COPY --chown=appuser:appuser src/ src/
+COPY --chown=appuser:appuser backend/ backend/
 COPY --chown=appuser:appuser .env.example .env
 
 # Crear directorio para base de datos SQLite (si se usa)
@@ -97,7 +97,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # --port 8000: Puerto de la aplicación
 # --workers 4: Número de workers (ajustar según CPU cores disponibles)
 # --log-level info: Nivel de logging
-CMD ["uvicorn", "src.ai_native_mvp.api.main:app", \
+CMD ["uvicorn", "backend.api.main:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
      "--workers", "4", \

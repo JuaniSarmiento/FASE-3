@@ -14,9 +14,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.ai_native_mvp.api.main import app
-from src.ai_native_mvp.database.models import Base
-from src.ai_native_mvp.api.deps import get_db
+from backend.api.main import app
+from backend.database.models import Base
+from backend.api.deps import get_db
 
 
 # ============================================================================

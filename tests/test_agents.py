@@ -12,17 +12,17 @@ Tests cover:
 import pytest
 from datetime import datetime
 
-from src.ai_native_mvp.agents.tutor import TutorCognitivoAgent, TutorMode
-from src.ai_native_mvp.agents.evaluator import EvaluadorProcesosAgent
-from src.ai_native_mvp.agents.risk_analyst import AnalistaRiesgoAgent
-from src.ai_native_mvp.agents.simulators import SimuladorProfesionalAgent, SimuladorType
-from src.ai_native_mvp.agents.governance import GobernanzaAgent
-from src.ai_native_mvp.agents.traceability import TrazabilidadN4Agent
+from backend.agents.tutor import TutorCognitivoAgent, TutorMode
+from backend.agents.evaluator import EvaluadorProcesosAgent
+from backend.agents.risk_analyst import AnalistaRiesgoAgent
+from backend.agents.simulators import SimuladorProfesionalAgent, SimuladorType
+from backend.agents.governance import GobernanzaAgent
+from backend.agents.traceability import TrazabilidadN4Agent
 
-from src.ai_native_mvp.core.cognitive_engine import CognitiveState
-from src.ai_native_mvp.models.trace import TraceLevel
-from src.ai_native_mvp.models.risk import RiskLevel, RiskDimension
-from src.ai_native_mvp.models.evaluation import CompetencyLevel
+from backend.core.cognitive_engine import CognitiveState
+from backend.models.trace import TraceLevel
+from backend.models.risk import RiskLevel, RiskDimension
+from backend.models.evaluation import CompetencyLevel
 
 
 # ============================================================================
@@ -198,7 +198,7 @@ class TestEvaluadorProcesosAgent:
 
     def test_evaluation_detects_delegation(self, evaluator, sample_trace_delegacion):
         """Test that evaluation detects delegation patterns"""
-        from src.ai_native_mvp.models.trace import TraceSequence
+        from backend.models.trace import TraceSequence
 
         sequence = TraceSequence(
             id="test",
@@ -221,7 +221,7 @@ class TestEvaluadorProcesosAgent:
         self, evaluator, sample_trace_conceptual, sample_trace_planning
     ):
         """Test that evaluation recognizes autonomous reasoning"""
-        from src.ai_native_mvp.models.trace import TraceSequence
+        from backend.models.trace import TraceSequence
 
         sequence = TraceSequence(
             id="test",
@@ -289,7 +289,7 @@ class TestAnalistaRiesgoAgent:
 
     def test_detect_cognitive_delegation_risk(self, analyst, sample_trace_delegacion):
         """Test detection of cognitive delegation risk"""
-        from src.ai_native_mvp.models.trace import TraceSequence
+        from backend.models.trace import TraceSequence
 
         sequence = TraceSequence(
             id="test",
@@ -428,7 +428,7 @@ class TestGobernanzaAgent:
         self, governance, sample_trace_delegacion
     ):
         """Test that compliance verification detects policy violations"""
-        from src.ai_native_mvp.models.trace import TraceSequence
+        from backend.models.trace import TraceSequence
 
         sequence = TraceSequence(
             id="test",

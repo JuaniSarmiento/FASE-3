@@ -12,21 +12,21 @@ import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.ai_native_mvp.models.trace import (
+from backend.models.trace import (
     CognitiveTrace,
     TraceSequence,
     TraceLevel,
     InteractionType,
 )
-from src.ai_native_mvp.core.cognitive_engine import CognitiveState
-from src.ai_native_mvp.models.risk import (
+from backend.core.cognitive_engine import CognitiveState
+from backend.models.risk import (
     Risk,
     RiskReport,
     RiskType,
     RiskLevel,
     RiskDimension,
 )
-from src.ai_native_mvp.models.evaluation import (
+from backend.models.evaluation import (
     EvaluationReport,
     CompetencyLevel,
     EvaluationDimension,

@@ -9,11 +9,11 @@ Cubre:
 import pytest
 from datetime import datetime
 
-from src.ai_native_mvp.database.repositories import (
+from backend.database.repositories import (
     InterviewSessionRepository,
     IncidentSimulationRepository,
 )
-from src.ai_native_mvp.agents.simulators import SimuladorProfesionalAgent
+from backend.agents.simulators import SimuladorProfesionalAgent
 
 
 # ============================================================================
@@ -526,8 +526,8 @@ class TestIntegracionCompleta:
 
     def test_flujo_completo_entrevista(self, interview_repo, session_id, db_session, mock_llm_provider):
         """Test: Flujo completo de entrevista técnica"""
-        from src.ai_native_mvp.database.models import SessionDB
-        from src.ai_native_mvp.database.repositories import SessionRepository
+        from backend.database.models import SessionDB
+        from backend.database.repositories import SessionRepository
 
         # Crear sesión en DB primero
         session_repo = SessionRepository(db_session)
@@ -599,7 +599,7 @@ class TestIntegracionCompleta:
 
     def test_flujo_completo_incidente(self, incident_repo, session_id, db_session):
         """Test: Flujo completo de resolución de incidente"""
-        from src.ai_native_mvp.database.repositories import SessionRepository
+        from backend.database.repositories import SessionRepository
 
         # Crear sesión en DB primero
         session_repo = SessionRepository(db_session)

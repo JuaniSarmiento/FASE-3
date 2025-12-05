@@ -13,16 +13,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.ai_native_mvp.core.ai_gateway import AIGateway
-from src.ai_native_mvp.database.models import Base
-from src.ai_native_mvp.database.repositories import (
+from backend.core.ai_gateway import AIGateway
+from backend.database.models import Base
+from backend.database.repositories import (
     SessionRepository,
     TraceRepository,
     RiskRepository,
     EvaluationRepository,
     TraceSequenceRepository,
 )
-from src.ai_native_mvp.llm.mock import MockLLMProvider
+from backend.llm.mock import MockLLMProvider
 
 
 # ============================================================================

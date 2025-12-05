@@ -10,7 +10,7 @@ antes de iniciar el servidor.
 import os
 import pytest
 from unittest.mock import patch, MagicMock
-from src.ai_native_mvp.api.startup_validation import (
+from backend.api.startup_validation import (
     StartupValidator,
     ConfigurationError,
     validate_startup_config,
@@ -446,7 +446,7 @@ class TestStartupIntegration:
         # Este test verifica que el código al final de startup_validation.py
         # se ejecuta correctamente sin errores fatales
         # (ya se ejecutó al importar al inicio del archivo)
-        from src.ai_native_mvp.api import startup_validation
+        from backend.api import startup_validation
         assert hasattr(startup_validation, 'StartupValidator')
         assert hasattr(startup_validation, 'validate_startup_config')
 
